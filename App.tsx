@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerToggleButton } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import HomeScreen from './screens/Home';
@@ -27,18 +27,14 @@ const HomeStackNavigator = () => {
         headerShown: true,
         headerBackButtonDisplayMode: 'minimal',
       }}
-      screenListeners={({ navigation, route }) => ({
-        focus: () => {
-          navigation.getParent()?.setOptions({
-            headerShown: route.name === 'Tab',
-          });
-        },
-      })}
     >
       <Stack.Screen
-        name="Tab"
+        name="Home"
         component={TabNavigator}
-        options={{ headerShown: false, title: '' }}
+        options={{
+          title: 'Home',
+          headerLeft: () => <DrawerToggleButton />,
+        }}
       />
       <Stack.Screen name="NewTweet" component={NewTweetScreen} options={{ title: '' }} />
       <Stack.Screen name="Tweet" component={TweetScreen} options={{ title: '' }} />
@@ -83,8 +79,12 @@ const TabNavigator = () => {
 export default function App() {
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Home" screenOptions={{ headerShown: true }}>
-        <Drawer.Screen name="Home" component={HomeStackNavigator} />
+      <Drawer.Navigator initialRouteName="Home">
+        <Drawer.Screen
+          name="Home"
+          component={HomeStackNavigator}
+          options={{ headerShown: false }}
+        />
         <Drawer.Screen name="Settings" component={SettingsScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
