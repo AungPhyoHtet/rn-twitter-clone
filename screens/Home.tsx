@@ -1,9 +1,9 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from './types';
-import EvilIcons from '@expo/vector-icons/EvilIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -67,15 +67,15 @@ export default function HomeScreen() {
         <View style={styles.tweetEngagementContainer}>
           <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
             <EvilIcons name="comment" size={24} color="gray" />
-            <Text style={{ fontSize: 12, color: 'gray' }}>12</Text>
+            <Text style={styles.engagementText}>12</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
             <EvilIcons name="retweet" size={24} color="gray" />
-            <Text style={{ fontSize: 12, color: 'gray' }}>12</Text>
+            <Text style={styles.engagementText}>12</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
             <EvilIcons name="heart" size={24} color="gray" />
-            <Text style={{ fontSize: 12, color: 'gray' }}>12</Text>
+            <Text style={styles.engagementText}>12</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
             <EvilIcons
@@ -165,6 +165,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginTop: 4,
+  },
+  engagementText: {
+    fontSize: 12,
+    color: 'gray',
   },
   floatingButton: {
     position: 'absolute',
