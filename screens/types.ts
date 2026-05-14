@@ -1,5 +1,5 @@
 export type RootStackParamList = {
-  Home: undefined;
+  Tabs: undefined;
   NewTweet: undefined;
   Tweet: undefined;
   Profile: undefined;

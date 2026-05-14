@@ -29,7 +29,7 @@ const HomeStackNavigator = () => {
       }}
     >
       <Stack.Screen
-        name="Home"
+        name="Tabs"
         component={TabNavigator}
         options={{
           title: 'Home',
@@ -79,11 +79,11 @@ const TabNavigator = () => {
 export default function App() {
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Home">
+      <Drawer.Navigator initialRouteName="Main">
         <Drawer.Screen
-          name="Home"
+          name="Main"
           component={HomeStackNavigator}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, drawerLabel: 'Home' }}
         />
         <Drawer.Screen name="Settings" component={SettingsScreen} />
       </Drawer.Navigator>

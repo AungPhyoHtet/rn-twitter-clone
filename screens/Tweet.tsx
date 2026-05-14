@@ -1,29 +1,35 @@
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from './types';
 
 export default function TweetScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  function goToProfile() {
+    navigation.navigate('Profile');
+  }
   return (
     <View style={styles.container}>
-      <View style={styles.itemContainer}>
-        <TouchableOpacity>
+      <TouchableOpacity onPress={() => goToProfile()}>
+        <View style={styles.itemContainer}>
           <Image
             source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }}
             style={styles.avatar}
           />
-        </TouchableOpacity>
-        <View style={styles.tweetUser}>
-          <Text numberOfLines={1} style={styles.tweetText}>
-            Aung Phyo Htet
-          </Text>
-          <Text numberOfLines={1} style={styles.username}>
-            @aungphyo.tech
-          </Text>
-        </View>
-        <TouchableOpacity>
+          <View style={styles.tweetUser}>
+            <Text numberOfLines={1} style={styles.tweetText}>
+              Aung Phyo Htet
+            </Text>
+            <Text numberOfLines={1} style={styles.username}>
+              @aungphyo.tech
+            </Text>
+          </View>
           <Entypo name="dots-three-vertical" size={16} color="gray" />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.tweetContentContainer}>
         <Text style={styles.tweetContent}>
           Lorem, ipsum dolor sit amet consectetur adipisicing elit. Totam quo alias soluta,
