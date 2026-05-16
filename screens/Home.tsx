@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { RootStackParamList } from './types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
 import formatDistance from '../helpers/formatDistanceCustom';
@@ -24,35 +24,47 @@ export default function HomeScreen() {
 
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const isFetchingRef = useRef(false);
 
-  function getAllTweets() {
+  const getAllTweets = useCallback(() => {
+    isFetchingRef.current = true;
     axios
-      .get('http://laravel-twitter-clone.test/api/v1/tweets')
+      .get('http://laravel-twitter-clone.test/api/v1/tweets', { params: { page: currentPage } })
       .then(function (response) {
-        console.log(response);
-        setData(response.data.data);
-        setIsLoading(false);
-        setIsRefreshing(false);
+        const tweets = response.data.data;
+        const lastPage = response.data.meta.last_page;
+        setData((prev) => (currentPage === 1 ? tweets : [...prev, ...tweets]));
+        setHasNextPage(currentPage < lastPage);
       })
       .catch(function (error) {
         console.log(error);
-        setIsLoading(false);
-        setIsRefreshing(false);
       })
       .finally(function () {
-        // always executed
+        setIsLoading(false);
+        setIsRefreshing(false);
+        setIsLoadingMore(false);
+        isFetchingRef.current = false;
       });
-  }
+  }, [currentPage]);
 
   function handleRefresh() {
     setIsRefreshing(true);
-    getAllTweets();
+    setCurrentPage(1);
+  }
+
+  function handleLoadMore() {
+    if (isFetchingRef.current || !hasNextPage) return;
+    setIsLoadingMore(true);
+    setCurrentPage((prev) => prev + 1);
   }
 
   useEffect(() => {
     getAllTweets();
-  }, []);
+  }, [getAllTweets]);
 
   type User = {
     id: number;
@@ -152,11 +164,14 @@ export default function HomeScreen() {
           data={data}
           renderItem={({ item }) => <RenderItem item={item} />}
           keyExtractor={(item: Tweet) => String(item.id)}
-          ItemSeparatorComponent={() => {
-            return <View style={styles.itemSeparator}></View>;
-          }}
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
+          ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={
+            isLoadingMore ? <ActivityIndicator style={{ padding: 16 }} color="gray" /> : null
+          }
         />
       )}
       <TouchableOpacity style={styles.floatingButton} onPress={() => goToNewTweet()}>
