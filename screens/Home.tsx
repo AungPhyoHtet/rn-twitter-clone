@@ -4,24 +4,50 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from './types';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { formatDistanceToNow } from 'date-fns';
+import formatDistance from '../helpers/formatDistanceCustom';
+import locale from 'date-fns/locale/en-US'
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third Item',
-    },
-  ];
-  type ItemProps = { title: string };
+
+  const [data, setData] = useState([]);
+
+  function getAllTweets() {
+    axios
+      .get('http://laravel-twitter-clone.test/api/v1/tweets')
+      .then(function (response) {
+        console.log(response);
+        setData(response.data.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }
+
+  useEffect(() => {
+    getAllTweets();
+  }, []);
+
+  type User = {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string;
+  };
+
+  type Tweet = {
+    id: number;
+    body: string;
+    user_id: number;
+    user: User;
+    created_at: string;
+  };
 
   function goToProfile() {
     navigation.navigate('Profile');
@@ -35,33 +61,41 @@ export default function HomeScreen() {
     navigation.navigate('NewTweet');
   }
 
-  const RenderItem = ({ item }: { item: ItemProps }) => (
+  const RenderItem = ({ item }: { item: Tweet }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={() => goToProfile()}>
         <Image
-          source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }}
+          source={{
+            uri: item.user.avatar,
+          }}
           style={styles.avatar}
         />
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
         <TouchableOpacity style={styles.tweetUser} onPress={() => goToTweet()}>
           <Text numberOfLines={1} style={styles.tweetText}>
-            {item.title}
+            {item.user.name}
           </Text>
           <Text numberOfLines={1} style={styles.username}>
-            @aungphyo.tech
+            @{item.user.username}
           </Text>
           <Text numberOfLines={1} style={styles.dot}>
             .
           </Text>
           <Text numberOfLines={1} style={styles.timestamp}>
-            9m
+            {/* {formatDistanceToNow(new Date(item.created_at))} */}
+            {formatDistanceToNow(new Date(item.created_at), {
+              addSuffix: true,
+              locale: {
+                ...locale,
+                formatDistance,
+              },
+            })}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tweetContentContainer} onPress={() => goToTweet()}>
           <Text numberOfLines={2} style={styles.tweetContent}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec venenatis vulputate
-            lorem. Maecenas vestibulum mollis diam.
+            {item.body}
           </Text>
         </TouchableOpacity>
         <View style={styles.tweetEngagementContainer}>
@@ -92,9 +126,9 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={DATA}
+        data={data}
         renderItem={({ item }) => <RenderItem item={item} />}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: Tweet) => String(item.id)}
         ItemSeparatorComponent={() => {
           return <View style={styles.itemSeparator}></View>;
         }}
@@ -126,6 +160,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   tweetUser: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -133,10 +168,12 @@ const styles = StyleSheet.create({
   tweetText: {
     fontSize: 16,
     fontWeight: 'bold',
+    flexShrink: 1,
   },
   username: {
     fontSize: 14,
     color: '#666',
+    flexShrink: 1,
   },
   dot: {
     fontSize: 14,
