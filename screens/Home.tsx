@@ -2,18 +2,29 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { RootStackParamList } from './types';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
 import formatDistance from '../helpers/formatDistanceCustom';
-import locale from 'date-fns/locale/en-US'
+import locale from 'date-fns/locale/en-US';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(true);
 
   function getAllTweets() {
     axios
@@ -21,13 +32,22 @@ export default function HomeScreen() {
       .then(function (response) {
         console.log(response);
         setData(response.data.data);
+        setIsLoading(false);
+        setIsRefreshing(false);
       })
       .catch(function (error) {
         console.log(error);
+        setIsLoading(false);
+        setIsRefreshing(false);
       })
       .finally(function () {
         // always executed
       });
+  }
+
+  function handleRefresh() {
+    setIsRefreshing(true);
+    getAllTweets();
   }
 
   useEffect(() => {
@@ -125,14 +145,20 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={data}
-        renderItem={({ item }) => <RenderItem item={item} />}
-        keyExtractor={(item: Tweet) => String(item.id)}
-        ItemSeparatorComponent={() => {
-          return <View style={styles.itemSeparator}></View>;
-        }}
-      />
+      {isLoading ? (
+        <ActivityIndicator style={{ marginTop: 8 }} size="large" color="gray" />
+      ) : (
+        <FlatList
+          data={data}
+          renderItem={({ item }) => <RenderItem item={item} />}
+          keyExtractor={(item: Tweet) => String(item.id)}
+          ItemSeparatorComponent={() => {
+            return <View style={styles.itemSeparator}></View>;
+          }}
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+        />
+      )}
       <TouchableOpacity style={styles.floatingButton} onPress={() => goToNewTweet()}>
         <AntDesign name="plus" size={24} color="white" />
       </TouchableOpacity>
