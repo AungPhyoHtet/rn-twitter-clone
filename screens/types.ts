@@ -2,7 +2,7 @@ export type RootStackParamList = {
   Tabs: undefined;
   NewTweet: undefined;
   Tweet: { tweetId: number };
-  Profile: undefined;
+  Profile: { userId: number };
 };
 
 export type TabParamList = {

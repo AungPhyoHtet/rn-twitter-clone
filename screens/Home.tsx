@@ -67,8 +67,8 @@ export default function HomeScreen() {
     getAllTweets();
   }, [getAllTweets]);
 
-  function goToProfile() {
-    navigation.navigate('Profile');
+  function goToProfile(userId: number) {
+    navigation.navigate('Profile', { userId });
   }
 
   function goToTweet(tweetId: number) {
@@ -83,7 +83,7 @@ export default function HomeScreen() {
 
   const RenderItem = ({ item }: { item: Tweet }) => (
     <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => goToProfile()}>
+      <TouchableOpacity onPress={() => goToProfile(item.user.id)}>
         <Image
           source={{
             uri: item.user.avatar,

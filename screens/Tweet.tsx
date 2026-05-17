@@ -47,8 +47,8 @@ export default function TweetScreen({ route }: Props) {
     getTweet();
   }, [getTweet]);
 
-  function goToProfile() {
-    navigation.navigate('Profile');
+  function goToProfile(userId: number) {
+    navigation.navigate('Profile', { userId });
   }
   return (
     <View style={styles.container}>
@@ -56,7 +56,7 @@ export default function TweetScreen({ route }: Props) {
         <ActivityIndicator style={{ marginTop: 8 }} size="large" color="gray" />
       ) : (
         <>
-          <TouchableOpacity onPress={() => goToProfile()}>
+          <TouchableOpacity onPress={() => goToProfile(tweet.user.id)}>
             <View style={styles.itemContainer}>
               <Image source={{ uri: tweet.user.avatar }} style={styles.avatar} />
               <View style={styles.tweetUser}>
