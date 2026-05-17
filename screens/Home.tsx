@@ -13,11 +13,12 @@ import {
   View,
 } from 'react-native';
 import { RootStackParamList } from './types';
+import { Tweet } from '../types/Tweet';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import axiosConfig from '../helpers/axiosConfig';
 import { formatDistanceToNow } from 'date-fns';
 import formatDistance from '../helpers/formatDistanceCustom';
-import locale from 'date-fns/locale/en-US';
+import { enUS as locale } from 'date-fns/locale';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -32,8 +33,8 @@ export default function HomeScreen() {
 
   const getAllTweets = useCallback(() => {
     isFetchingRef.current = true;
-    axios
-      .get('http://laravel-twitter-clone.test/api/v1/tweets', { params: { page: currentPage } })
+    axiosConfig
+      .get('/tweets', { params: { page: currentPage } })
       .then(function (response) {
         const tweets = response.data.data;
         const lastPage = response.data.meta.last_page;
@@ -66,27 +67,14 @@ export default function HomeScreen() {
     getAllTweets();
   }, [getAllTweets]);
 
-  type User = {
-    id: number;
-    name: string;
-    username: string;
-    avatar: string;
-  };
-
-  type Tweet = {
-    id: number;
-    body: string;
-    user_id: number;
-    user: User;
-    created_at: string;
-  };
-
   function goToProfile() {
     navigation.navigate('Profile');
   }
 
-  function goToTweet() {
-    navigation.navigate('Tweet');
+  function goToTweet(tweetId: number) {
+    navigation.navigate('Tweet', {
+      tweetId,
+    });
   }
 
   function goToNewTweet() {
@@ -104,7 +92,7 @@ export default function HomeScreen() {
         />
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
-        <TouchableOpacity style={styles.tweetUser} onPress={() => goToTweet()}>
+        <TouchableOpacity style={styles.tweetUser} onPress={() => goToTweet(item.id)}>
           <Text numberOfLines={1} style={styles.tweetText}>
             {item.user.name}
           </Text>
@@ -125,25 +113,25 @@ export default function HomeScreen() {
             })}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tweetContentContainer} onPress={() => goToTweet()}>
+        <TouchableOpacity style={styles.tweetContentContainer} onPress={() => goToTweet(item.id)}>
           <Text numberOfLines={2} style={styles.tweetContent}>
             {item.body}
           </Text>
         </TouchableOpacity>
         <View style={styles.tweetEngagementContainer}>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
+          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
             <EvilIcons name="comment" size={24} color="gray" />
             <Text style={styles.engagementText}>12</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
+          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
             <EvilIcons name="retweet" size={24} color="gray" />
             <Text style={styles.engagementText}>12</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
+          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
             <EvilIcons name="heart" size={24} color="gray" />
             <Text style={styles.engagementText}>12</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet()}>
+          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
             <EvilIcons
               name={Platform.OS === 'ios' ? 'share-apple' : 'share-google'}
               size={24}
@@ -163,7 +151,7 @@ export default function HomeScreen() {
         <FlatList
           data={data}
           renderItem={({ item }) => <RenderItem item={item} />}
-          keyExtractor={(item: Tweet) => String(item.id)}
+          keyExtractor={(item: Tweet) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
