@@ -34,7 +34,7 @@ export default function TweetScreen({ route }: Props) {
           console.log(response.data.data);
         })
         .catch(function (error) {
-          console.log(error);
+          console.log(error.response?.data);
         })
         .finally(function () {
           setIsLoading(false);

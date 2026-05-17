@@ -1,16 +1,37 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
+import axiosConfig from '../helpers/axiosConfig';
 
 export default function NewTweetScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [isLoading, setIsLoading] = useState(false);
   const [tweet, setTweet] = useState('');
+  const [error, setError] = useState('');
 
   function sendTweet() {
-    navigation.navigate('Tabs');
+    if (!tweet.trim()) {
+      setError('Body is required.');
+      return;
+    }
+    setError('');
+    setIsLoading(true);
+    axiosConfig
+      .post('/tweets', { body: tweet })
+      .then(function (response) {
+        response.data.data;
+        console.log(response.data);
+        navigation.navigate('Tabs');
+      })
+      .catch(function (error) {
+        console.log(error.response?.data);
+      })
+      .finally(function () {
+        setIsLoading(false);
+      });
   }
 
   return (
@@ -19,7 +40,12 @@ export default function NewTweetScreen() {
         <Text style={tweet.length > 250 ? styles.tweetText : styles.alertText}>
           Characters left: {280 - tweet.length}
         </Text>
-        <TouchableOpacity style={styles.tweetButton} onPress={() => sendTweet()}>
+        <TouchableOpacity
+          style={styles.tweetButton}
+          onPress={() => sendTweet()}
+          disabled={isLoading}
+        >
+          {isLoading && <ActivityIndicator size="small" color="white" />}
           <Text style={styles.tweetButtonText}>Tweet</Text>
         </TouchableOpacity>
       </View>
@@ -28,16 +54,22 @@ export default function NewTweetScreen() {
           source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }}
           style={styles.avatar}
         />
-        <TextInput
-          editable
-          multiline
-          maxLength={280}
-          onChangeText={setTweet}
-          placeholder="What's happening?"
-          placeholderTextColor="gray"
-          value={tweet}
-          style={styles.tweetInput}
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            editable
+            multiline
+            maxLength={280}
+            onChangeText={(text) => {
+              setTweet(text);
+              if (error) setError('');
+            }}
+            placeholder="What's happening?"
+            placeholderTextColor="gray"
+            value={tweet}
+            style={styles.tweetInput}
+          />
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        </View>
       </View>
     </View>
   );
@@ -61,6 +93,8 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   tweetButton: {
+    flexDirection: 'row',
+    gap: 8,
     backgroundColor: '#1d9bf1',
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -80,10 +114,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
   },
-  tweetInput: {
+  inputContainer: {
     flex: 1,
+  },
+  tweetInput: {
     fontSize: 16,
     lineHeight: 24,
     padding: 4,
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 4,
   },
 });
