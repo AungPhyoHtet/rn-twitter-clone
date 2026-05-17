@@ -1,28 +1,15 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
-import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from './types';
 import { Tweet } from '../types/Tweet';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import axiosConfig from '../helpers/axiosConfig';
-import { formatDistanceToNow } from 'date-fns';
-import formatDistance from '../helpers/formatDistanceCustom';
-import { enUS as locale } from 'date-fns/locale';
+import TweetItem from '../components/TweetItem';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -67,81 +54,9 @@ export default function HomeScreen() {
     getAllTweets();
   }, [getAllTweets]);
 
-  function goToProfile(userId: number) {
-    navigation.navigate('Profile', { userId });
-  }
-
-  function goToTweet(tweetId: number) {
-    navigation.navigate('Tweet', {
-      tweetId,
-    });
-  }
-
   function goToNewTweet() {
     navigation.navigate('NewTweet');
   }
-
-  const RenderItem = ({ item }: { item: Tweet }) => (
-    <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => goToProfile(item.user.id)}>
-        <Image
-          source={{
-            uri: item.user.avatar,
-          }}
-          style={styles.avatar}
-        />
-      </TouchableOpacity>
-      <View style={{ flex: 1 }}>
-        <TouchableOpacity style={styles.tweetUser} onPress={() => goToTweet(item.id)}>
-          <Text numberOfLines={1} style={styles.tweetText}>
-            {item.user.name}
-          </Text>
-          <Text numberOfLines={1} style={styles.username}>
-            @{item.user.username}
-          </Text>
-          <Text numberOfLines={1} style={styles.dot}>
-            .
-          </Text>
-          <Text numberOfLines={1} style={styles.timestamp}>
-            {/* {formatDistanceToNow(new Date(item.created_at))} */}
-            {formatDistanceToNow(new Date(item.created_at), {
-              addSuffix: true,
-              locale: {
-                ...locale,
-                formatDistance,
-              },
-            })}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tweetContentContainer} onPress={() => goToTweet(item.id)}>
-          <Text numberOfLines={2} style={styles.tweetContent}>
-            {item.body}
-          </Text>
-        </TouchableOpacity>
-        <View style={styles.tweetEngagementContainer}>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
-            <EvilIcons name="comment" size={24} color="gray" />
-            <Text style={styles.engagementText}>12</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
-            <EvilIcons name="retweet" size={24} color="gray" />
-            <Text style={styles.engagementText}>12</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
-            <EvilIcons name="heart" size={24} color="gray" />
-            <Text style={styles.engagementText}>12</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.engagementButton} onPress={() => goToTweet(item.id)}>
-            <EvilIcons
-              name={Platform.OS === 'ios' ? 'share-apple' : 'share-google'}
-              size={24}
-              color="gray"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
@@ -150,7 +65,7 @@ export default function HomeScreen() {
       ) : (
         <FlatList
           data={data}
-          renderItem={({ item }) => <RenderItem item={item} />}
+          renderItem={({ item }) => <TweetItem item={item} />}
           keyExtractor={(item: Tweet) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           refreshing={isRefreshing}
@@ -174,67 +89,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  itemContainer: {
-    flexDirection: 'row',
-    padding: 16,
-  },
   itemSeparator: {
     height: 1,
     backgroundColor: '#eee',
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 16,
-  },
-  tweetUser: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  tweetText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    flexShrink: 1,
-  },
-  username: {
-    fontSize: 14,
-    color: '#666',
-    flexShrink: 1,
-  },
-  dot: {
-    fontSize: 14,
-    color: '#666',
-    marginHorizontal: 4,
-  },
-  timestamp: {
-    fontSize: 14,
-    color: '#666',
-  },
-  tweetContentContainer: {
-    marginTop: 4,
-  },
-  tweetContent: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-  },
-  tweetEngagementContainer: {
-    flexDirection: 'row',
-    marginTop: 8,
-    gap: 32,
-  },
-  engagementButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  engagementText: {
-    fontSize: 12,
-    color: 'gray',
   },
   floatingButton: {
     position: 'absolute',
