@@ -1,16 +1,24 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
-import { User, UserTweet } from '../types/User';
-import { useCallback, useEffect, useState } from 'react';
+import { User } from '../types/User';
+import { Tweet } from '../types/Tweet';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axiosConfig from '../helpers/axiosConfig';
 import ProfileHeader from '../components/ProfileHeader';
+import TweetItem from '../components/TweetItem';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
 
 export default function ProfileScreen({ route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const isFetchingRef = useRef(false);
 
   const getUser = useCallback(
     function () {
@@ -18,28 +26,61 @@ export default function ProfileScreen({ route }: Props) {
         .get(`/users/${route.params.userId}`)
         .then(function (response) {
           setUser(response.data);
-          console.log(response.data);
+        })
+        .catch(function (error) {
+          console.log(error.response?.data);
+        });
+    },
+    [route.params.userId],
+  );
+
+  const getTweets = useCallback(
+    function () {
+      isFetchingRef.current = true;
+      axiosConfig
+        .get(`/users/${route.params.userId}/tweets`, { params: { page: currentPage } })
+        .then(function (response) {
+          const data = response.data.data;
+          const lastPage = response.data.meta.last_page;
+          setTweets((prev) => (currentPage === 1 ? data : [...prev, ...data]));
+          setHasNextPage(currentPage < lastPage);
         })
         .catch(function (error) {
           console.log(error.response?.data);
         })
         .finally(function () {
           setIsLoading(false);
+          setIsRefreshing(false);
+          setIsLoadingMore(false);
+          isFetchingRef.current = false;
         });
     },
-    [route.params.userId],
+    [route.params.userId, currentPage],
   );
 
   useEffect(() => {
     getUser();
   }, [getUser]);
 
-  const RenderItem = ({ item }: { item: UserTweet }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.tweetContent}>{item.body}</Text>
-    </View>
-  );
+  useEffect(() => {
+    getTweets();
+  }, [getTweets]);
 
+  function handleRefresh() {
+    setIsRefreshing(true);
+    getUser();
+    if (currentPage === 1) {
+      getTweets();
+    } else {
+      setCurrentPage(1);
+    }
+  }
+
+  function handleLoadMore() {
+    if (isFetchingRef.current || !hasNextPage) return;
+    setIsLoadingMore(true);
+    setCurrentPage((prev) => prev + 1);
+  }
 
   return (
     <View style={styles.container}>
@@ -47,11 +88,18 @@ export default function ProfileScreen({ route }: Props) {
         <ActivityIndicator style={{ marginTop: 8 }} size="large" color="gray" />
       ) : (
         <FlatList
-          data={user?.tweets ?? []}
-          renderItem={RenderItem}
+          data={tweets}
+          renderItem={({ item }) => <TweetItem item={item} />}
           keyExtractor={(item) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           ListHeaderComponent={user ? () => <ProfileHeader user={user} /> : null}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={
+            isLoadingMore ? <ActivityIndicator style={{ padding: 16 }} color="gray" /> : null
+          }
         />
       )}
     </View>
@@ -67,13 +115,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#e5e7eb',
     marginVertical: 8,
-  },
-  itemContainer: {
-    padding: 16,
-  },
-  tweetContent: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
   },
 });
