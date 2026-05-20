@@ -34,10 +34,7 @@ export default function ProfileHeader({ user }: Props) {
         ) : null}
         <View style={styles.linkContainer}>
           {user.link ? (
-            <TouchableOpacity
-              style={styles.linkItem}
-              onPress={() => Linking.openURL(user.link!)}
-            >
+            <TouchableOpacity style={styles.linkItem} onPress={() => Linking.openURL(user.link!)}>
               <EvilIcons name="link" size={24} color="gray" />
               <Text style={styles.linkText}>{user.link_text ?? user.link}</Text>
             </TouchableOpacity>

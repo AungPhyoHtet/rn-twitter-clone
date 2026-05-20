@@ -3,6 +3,8 @@ export type RootStackParamList = {
   NewTweet: undefined;
   Tweet: { tweetId: number };
   Profile: { userId: number };
+  Login: undefined;
+  Register: undefined;
 };
 
 export type TabParamList = {
