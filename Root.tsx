@@ -21,6 +21,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import LoginScreen from './screens/Auth/Login';
 import RegisterScreen from './screens/Auth/Register';
+import ForgotPasswordScreen from './screens/Auth/ForgotPassword';
 
 import * as SecureStore from 'expo-secure-store';
 import axiosConfig from './helpers/axiosConfig';
@@ -56,6 +57,11 @@ const AuthStackNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 };

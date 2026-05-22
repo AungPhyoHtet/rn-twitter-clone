@@ -62,18 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
         },
         logout: () => {
-          axiosConfig
-            .post('/logout')
-            .then(() => {
-              axiosConfig.defaults.headers.common['Authorization'] = '';
-              setUser(null);
-              SecureStore.deleteItemAsync('user');
-              SecureStore.deleteItemAsync('token');
-            })
-            .catch((error) => {
-              console.log(error.response?.data);
-              setIsLoading(false);
-            });
+          axiosConfig.post('/logout').catch(() => {}).finally(() => {
+            axiosConfig.defaults.headers.common['Authorization'] = '';
+            setUser(null);
+            SecureStore.deleteItemAsync('user');
+            SecureStore.deleteItemAsync('token');
+          });
         },
       }}
     >
