@@ -9,6 +9,14 @@ type AuthContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
   login: (email: string, password: string, onError?: () => void) => void;
+  register: (
+    name: string,
+    email: string,
+    username: string,
+    password: string,
+    passwordConfirmation: string,
+    onError?: () => void,
+  ) => void;
   logout: () => void;
   isLoading: boolean;
   errors: ApiErrors;
@@ -61,13 +69,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               onError?.();
             });
         },
+        register: (
+          name: string,
+          email: string,
+          username: string,
+          password: string,
+          passwordConfirmation: string,
+          onError?: () => void,
+        ) => {
+          setIsLoading(true);
+          setErrors({});
+          setErrorMessage('');
+          axiosConfig
+            .post('/register', {
+              name,
+              email,
+              username,
+              password,
+              password_confirmation: passwordConfirmation,
+              device_name: 'mobile',
+            })
+            .then((response) => {
+              const { user: loggedInUser, token }: { user: User; token: string } = response.data;
+              axiosConfig.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+              setUser(loggedInUser);
+              SecureStore.setItemAsync('user', JSON.stringify(loggedInUser));
+              SecureStore.setItemAsync('token', token);
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              setErrors(error.response?.data.errors ?? {});
+              setErrorMessage(error.response?.data.message ?? 'Something went wrong.');
+              setIsLoading(false);
+              onError?.();
+            });
+        },
         logout: () => {
-          axiosConfig.post('/logout').catch(() => {}).finally(() => {
-            axiosConfig.defaults.headers.common['Authorization'] = '';
-            setUser(null);
-            SecureStore.deleteItemAsync('user');
-            SecureStore.deleteItemAsync('token');
-          });
+          axiosConfig
+            .post('/logout')
+            .catch(() => {})
+            .finally(() => {
+              axiosConfig.defaults.headers.common['Authorization'] = '';
+              setUser(null);
+              SecureStore.deleteItemAsync('user');
+              SecureStore.deleteItemAsync('token');
+            });
         },
       }}
     >
