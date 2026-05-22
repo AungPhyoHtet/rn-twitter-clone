@@ -1,8 +1,6 @@
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types';
-import { User } from '../types/User';
-import { Tweet } from '../types/Tweet';
+import { RootStackParamList, User, Tweet } from '../types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import axiosConfig from '../helpers/axiosConfig';
 import ProfileHeader from '../components/ProfileHeader';

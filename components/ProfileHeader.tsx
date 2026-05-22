@@ -1,7 +1,7 @@
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { format } from 'date-fns';
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { User } from '../types/User';
+import { User } from '../types';
 
 type Props = {
   user: User;

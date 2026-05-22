@@ -5,6 +5,8 @@ export type RootStackParamList = {
   Profile: { userId: number };
   Login: undefined;
   Register: undefined;
+  LoginScreen: undefined;
+  RegisterScreen: undefined;
 };
 
 export type TabParamList = {

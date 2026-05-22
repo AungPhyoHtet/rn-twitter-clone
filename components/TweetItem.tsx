@@ -4,8 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS as locale } from 'date-fns/locale';
-import { Tweet } from '../types/Tweet';
-import { RootStackParamList } from '../screens/types';
+import { Tweet, RootStackParamList } from '../types';
 import formatDistance from '../helpers/formatDistanceCustom';
 
 type Props = {

@@ -2,7 +2,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
-import { RootStackParamList } from './types';
+import { RootStackParamList } from '../types';
 import { useNavigation } from '@react-navigation/native';
 import axiosConfig from '../helpers/axiosConfig';
 

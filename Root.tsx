@@ -11,7 +11,7 @@ import TweetScreen from './screens/Tweet';
 import ProfileScreen from './screens/Profile';
 import SearchScreen from './screens/Search';
 import NotificationsScreen from './screens/Notifications';
-import { RootStackParamList } from './screens/types';
+import { RootStackParamList } from './types';
 import SettingsScreen from './screens/Settings';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -22,6 +22,8 @@ import { ActivityIndicator, View } from 'react-native';
 import LoginScreen from './screens/Auth/Login';
 import RegisterScreen from './screens/Auth/Register';
 
+import * as SecureStore from 'expo-secure-store';
+import axiosConfig from './helpers/axiosConfig';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -93,13 +95,28 @@ const TabNavigator = () => {
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+    Promise.all([SecureStore.getItemAsync('user'), SecureStore.getItemAsync('token')])
+      .then(([userString, token]) => {
+        if (userString && token) {
+          const parsedUser = JSON.parse(userString);
+          if (parsedUser?.id) {
+            setUser(parsedUser);
+            axiosConfig.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          } else {
+            SecureStore.deleteItemAsync('user');
+            SecureStore.deleteItemAsync('token');
+          }
+        }
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+      });
+  }, [setUser]);
 
   if (isLoading) {
     return (
