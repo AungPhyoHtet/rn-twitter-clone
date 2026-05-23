@@ -5,9 +5,13 @@ import { User } from '../types';
 
 type Props = {
   user: User;
+  isFollowing: boolean;
+  isFollowLoading: boolean;
+  onFollow: () => void;
+  onUnfollow: () => void;
 };
 
-export default function ProfileHeader({ user }: Props) {
+export default function ProfileHeader({ user, isFollowing, isFollowLoading, onFollow, onUnfollow }: Props) {
   return (
     <View>
       <Image
@@ -18,8 +22,12 @@ export default function ProfileHeader({ user }: Props) {
       />
       <View style={styles.avatarContainer}>
         <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        <TouchableOpacity style={styles.followButton}>
-          <Text style={styles.followButtonText}>Follow</Text>
+        <TouchableOpacity
+          style={[styles.followButton, isFollowing && styles.unfollowButton]}
+          onPress={isFollowing ? onUnfollow : onFollow}
+          disabled={isFollowLoading}
+        >
+          <Text style={[styles.followButtonText, isFollowing && { color: 'black' }]}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.nameContainer}>
@@ -51,11 +59,11 @@ export default function ProfileHeader({ user }: Props) {
       </View>
       <View style={styles.followContainer}>
         <View style={styles.followItem}>
-          <Text style={styles.followItemNumber}>0</Text>
+          <Text style={styles.followItemNumber}>{user.following_count ?? 0}</Text>
           <Text style={styles.followItemText}>Following</Text>
         </View>
         <View style={styles.followItem}>
-          <Text style={styles.followItemNumber}>0</Text>
+          <Text style={styles.followItemNumber}>{user.followers_count ?? 0}</Text>
           <Text style={styles.followItemText}>Followers</Text>
         </View>
       </View>
@@ -89,6 +97,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 24,
+  },
+  unfollowButton: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
   followButtonText: {
     fontWeight: 'bold',

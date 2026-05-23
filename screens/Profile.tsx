@@ -12,6 +12,8 @@ export default function ProfileScreen({ route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,6 +26,7 @@ export default function ProfileScreen({ route }: Props) {
         .get(`/users/${route.params.userId}`)
         .then(function (response) {
           setUser(response.data);
+          setIsFollowing(response.data.is_following ?? false);
         })
         .catch(function (error) {
           console.log(error.response?.data);
@@ -74,6 +77,34 @@ export default function ProfileScreen({ route }: Props) {
     }
   }
 
+  function handleFollow() {
+    setIsFollowLoading(true);
+    axiosConfig
+      .post(`/users/${route.params.userId}/follow`)
+      .then(() => {
+        setIsFollowing(true);
+        setUser((prev) => prev ? { ...prev, followers_count: (prev.followers_count ?? 0) + 1 } : prev);
+      })
+      .catch((error) => {
+        console.log(error.response?.data);
+      })
+      .finally(() => setIsFollowLoading(false));
+  }
+
+  function handleUnfollow() {
+    setIsFollowLoading(true);
+    axiosConfig
+      .delete(`/users/${route.params.userId}/follow`)
+      .then(() => {
+        setIsFollowing(false);
+        setUser((prev) => prev ? { ...prev, followers_count: (prev.followers_count ?? 1) - 1 } : prev);
+      })
+      .catch((error) => {
+        console.log(error.response?.data);
+      })
+      .finally(() => setIsFollowLoading(false));
+  }
+
   function handleLoadMore() {
     if (isFetchingRef.current || !hasNextPage) return;
     setIsLoadingMore(true);
@@ -90,7 +121,19 @@ export default function ProfileScreen({ route }: Props) {
           renderItem={({ item }) => <TweetItem item={item} />}
           keyExtractor={(item) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-          ListHeaderComponent={user ? () => <ProfileHeader user={user} /> : null}
+          ListHeaderComponent={
+            user
+              ? () => (
+                  <ProfileHeader
+                    user={user}
+                    isFollowing={isFollowing}
+                    isFollowLoading={isFollowLoading}
+                    onFollow={handleFollow}
+                    onUnfollow={handleUnfollow}
+                  />
+                )
+              : null
+          }
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
           onEndReached={handleLoadMore}

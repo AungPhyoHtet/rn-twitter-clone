@@ -14,5 +14,8 @@ export type User = {
   link?: string;
   link_text?: string;
   created_at?: string;
+  followers_count?: number;
+  following_count?: number;
+  is_following?: boolean;
   tweets?: UserTweet[];
 };
