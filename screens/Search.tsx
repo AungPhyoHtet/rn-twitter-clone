@@ -1,5 +1,5 @@
 import EvilIcons from '@expo/vector-icons/EvilIcons';
-import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Tweet } from '../types';
 import { useRef, useState } from 'react';
 import axiosConfig from '../helpers/axiosConfig';
@@ -56,6 +56,13 @@ export default function SearchScreen() {
           renderItem={({ item }) => <TweetItem item={item} />}
           keyExtractor={(item: Tweet) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+          ListEmptyComponent={
+            query.trim() ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No results for "{query}"</Text>
+              </View>
+            ) : null
+          }
         />
       )}
     </View>
@@ -85,5 +92,13 @@ const styles = StyleSheet.create({
   itemSeparator: {
     height: 1,
     backgroundColor: '#eee',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 48,
+  },
+  emptyText: {
+    color: 'gray',
+    fontSize: 16,
   },
 });
