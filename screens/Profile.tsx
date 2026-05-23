@@ -1,14 +1,17 @@
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, User, Tweet } from '../types';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import axiosConfig from '../helpers/axiosConfig';
 import ProfileHeader from '../components/ProfileHeader';
 import TweetItem from '../components/TweetItem';
+import { AuthContext } from '../context/AuthProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
 
 export default function ProfileScreen({ route }: Props) {
+  const { user: authUser } = useContext(AuthContext);
+  const isOwnProfile = authUser?.id === route.params.userId;
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
@@ -83,7 +86,9 @@ export default function ProfileScreen({ route }: Props) {
       .post(`/users/${route.params.userId}/follow`)
       .then(() => {
         setIsFollowing(true);
-        setUser((prev) => prev ? { ...prev, followers_count: (prev.followers_count ?? 0) + 1 } : prev);
+        setUser((prev) =>
+          prev ? { ...prev, followers_count: (prev.followers_count ?? 0) + 1 } : prev,
+        );
       })
       .catch((error) => {
         console.log(error.response?.data);
@@ -97,7 +102,9 @@ export default function ProfileScreen({ route }: Props) {
       .delete(`/users/${route.params.userId}/follow`)
       .then(() => {
         setIsFollowing(false);
-        setUser((prev) => prev ? { ...prev, followers_count: (prev.followers_count ?? 1) - 1 } : prev);
+        setUser((prev) =>
+          prev ? { ...prev, followers_count: (prev.followers_count ?? 1) - 1 } : prev,
+        );
       })
       .catch((error) => {
         console.log(error.response?.data);
@@ -126,6 +133,7 @@ export default function ProfileScreen({ route }: Props) {
               ? () => (
                   <ProfileHeader
                     user={user}
+                    isOwnProfile={isOwnProfile}
                     isFollowing={isFollowing}
                     isFollowLoading={isFollowLoading}
                     onFollow={handleFollow}

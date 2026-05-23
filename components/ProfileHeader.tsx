@@ -5,13 +5,14 @@ import { User } from '../types';
 
 type Props = {
   user: User;
+  isOwnProfile: boolean;
   isFollowing: boolean;
   isFollowLoading: boolean;
   onFollow: () => void;
   onUnfollow: () => void;
 };
 
-export default function ProfileHeader({ user, isFollowing, isFollowLoading, onFollow, onUnfollow }: Props) {
+export default function ProfileHeader({ user, isOwnProfile, isFollowing, isFollowLoading, onFollow, onUnfollow }: Props) {
   return (
     <View>
       <Image
@@ -22,13 +23,17 @@ export default function ProfileHeader({ user, isFollowing, isFollowLoading, onFo
       />
       <View style={styles.avatarContainer}>
         <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        <TouchableOpacity
-          style={[styles.followButton, isFollowing && styles.unfollowButton]}
-          onPress={isFollowing ? onUnfollow : onFollow}
-          disabled={isFollowLoading}
-        >
-          <Text style={[styles.followButtonText, isFollowing && { color: 'black' }]}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
-        </TouchableOpacity>
+        {!isOwnProfile && (
+          <TouchableOpacity
+            style={[styles.followButton, isFollowing && styles.unfollowButton]}
+            onPress={isFollowing ? onUnfollow : onFollow}
+            disabled={isFollowLoading}
+          >
+            <Text style={[styles.followButtonText, isFollowing && { color: 'black' }]}>
+              {isFollowing ? 'Unfollow' : 'Follow'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.nameContainer}>
         <Text style={styles.nameText}>{user.name}</Text>
