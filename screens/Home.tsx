@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const getAllTweets = useCallback(() => {
     isFetchingRef.current = true;
     axiosConfig
-      .get('/tweets', { params: { page: currentPage } })
+      .get('/feed', { params: { page: currentPage } })
       .then(function (response) {
         const tweets = response.data.data;
         const lastPage = response.data.meta.last_page;
