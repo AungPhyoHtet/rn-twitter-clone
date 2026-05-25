@@ -9,9 +9,10 @@ import formatDistance from '../helpers/formatDistanceCustom';
 
 type Props = {
   item: Tweet;
+  onDelete?: (id: number) => void;
 };
 
-export default function TweetItem({ item }: Props) {
+export default function TweetItem({ item, onDelete }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   function goToProfile() {
@@ -19,7 +20,7 @@ export default function TweetItem({ item }: Props) {
   }
 
   function goToTweet() {
-    navigation.navigate('Tweet', { tweetId: item.id });
+    navigation.navigate('Tweet', { tweetId: item.id, onDelete });
   }
 
   return (

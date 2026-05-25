@@ -118,6 +118,10 @@ export default function ProfileScreen({ route }: Props) {
     setCurrentPage((prev) => prev + 1);
   }
 
+  function handleDelete(id: number) {
+    setTweets((prev) => prev.filter((tweet) => tweet.id !== id));
+  }
+
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -125,7 +129,7 @@ export default function ProfileScreen({ route }: Props) {
       ) : (
         <FlatList
           data={tweets}
-          renderItem={({ item }) => <TweetItem item={item} />}
+          renderItem={({ item }) => <TweetItem item={item} onDelete={handleDelete} />}
           keyExtractor={(item) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           ListHeaderComponent={

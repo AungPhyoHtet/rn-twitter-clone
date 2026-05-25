@@ -1,7 +1,7 @@
 export type RootStackParamList = {
   Tabs: undefined;
   NewTweet: undefined;
-  Tweet: { tweetId: number };
+  Tweet: { tweetId: number; onDelete?: (id: number) => void };
   Profile: { userId: number };
   Login: undefined;
   Register: undefined;

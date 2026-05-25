@@ -1,5 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList, Tweet } from '../types';
@@ -16,7 +16,9 @@ export default function HomeScreen() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   const isFetchingRef = useRef(false);
+  const hasMountedRef = useRef(false);
 
   const getAllTweets = useCallback(() => {
     isFetchingRef.current = true;
@@ -37,11 +39,26 @@ export default function HomeScreen() {
         setIsLoadingMore(false);
         isFetchingRef.current = false;
       });
-  }, [currentPage]);
+  }, [currentPage, refreshKey]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasMountedRef.current) {
+        hasMountedRef.current = true;
+        return;
+      }
+      setCurrentPage(1);
+      setRefreshKey((prev) => prev + 1);
+    }, []),
+  );
 
   function handleRefresh() {
     setIsRefreshing(true);
-    setCurrentPage(1);
+    if (currentPage === 1) {
+      getAllTweets();
+    } else {
+      setCurrentPage(1);
+    }
   }
 
   function handleLoadMore() {
@@ -58,6 +75,10 @@ export default function HomeScreen() {
     navigation.navigate('NewTweet');
   }
 
+  function handleDelete(id: number) {
+    setData((prev) => prev.filter((tweet: Tweet) => tweet.id !== id));
+  }
+
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -65,7 +86,7 @@ export default function HomeScreen() {
       ) : (
         <FlatList
           data={data}
-          renderItem={({ item }) => <TweetItem item={item} />}
+          renderItem={({ item }) => <TweetItem item={item} onDelete={handleDelete} />}
           keyExtractor={(item: Tweet) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           refreshing={isRefreshing}

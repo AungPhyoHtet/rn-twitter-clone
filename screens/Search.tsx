@@ -11,6 +11,10 @@ export default function SearchScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  function handleDelete(id: number) {
+    setData((prev) => prev.filter((tweet: Tweet) => tweet.id !== id));
+  }
+
   function handleSearch(text: string) {
     setQuery(text);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -53,7 +57,7 @@ export default function SearchScreen() {
       ) : (
         <FlatList
           data={data}
-          renderItem={({ item }) => <TweetItem item={item} />}
+          renderItem={({ item }) => <TweetItem item={item} onDelete={handleDelete} />}
           keyExtractor={(item: Tweet) => item.id.toString()}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           ListEmptyComponent={

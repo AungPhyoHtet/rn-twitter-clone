@@ -6,4 +6,5 @@ export type Tweet = {
   user_id: number;
   user: User;
   created_at: string;
+  pinned?: boolean;
 };
